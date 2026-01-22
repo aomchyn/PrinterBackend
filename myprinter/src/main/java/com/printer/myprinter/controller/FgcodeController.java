@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.printer.myprinter.entity.FgcodeEntity;
-import com.printer.myprinter.repository.FgcodeRepositoiry;
+import com.printer.myprinter.repository.FgcodeRepository;
 
 import java.util.List;
 
@@ -22,31 +22,31 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RestController
 @RequestMapping("/fgcode")
 public class FgcodeController {
-    private final FgcodeRepositoiry fgcodeRepositoiry;
+    private final FgcodeRepository fgcodeRepository;
 
-    public FgcodeController (FgcodeRepositoiry fgcodeRepositoiry){
-        this.fgcodeRepositoiry = fgcodeRepositoiry;
+    public FgcodeController (FgcodeRepository fgcodeRepository){
+        this.fgcodeRepository = fgcodeRepository;
     }
 
     @GetMapping
     public List<FgcodeEntity> getAllFgcode(){
-        return fgcodeRepositoiry.findAll();
+        return fgcodeRepository.findAll();
     }
     
 
     @PostMapping
     public FgcodeEntity createFgcode(@RequestBody FgcodeEntity fgcode){
-        return fgcodeRepositoiry.save(fgcode);
+        return fgcodeRepository.save(fgcode);
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public FgcodeEntity getById (@PathVariable String id){
-        return fgcodeRepositoiry.findByid(id).orElse(null);
+        return fgcodeRepository.findById(id).orElse(null);
     }
 
     @PutMapping("/{id}")
     public FgcodeEntity updateFgcode(@PathVariable String id, @RequestBody FgcodeEntity fgcode){
-        FgcodeEntity fgcodeUpdate = fgcodeRepositoiry.findByid(id);
+        FgcodeEntity fgcodeUpdate = fgcodeRepository.findById(id);
 
         if (fgcodeUpdate == null){
             throw new IllegalArgumentException("Not found");
@@ -55,14 +55,16 @@ public class FgcodeController {
         fgcodeUpdate.setName(fgcode.getName());
         fgcode.setExp(fgcode.getExp());
 
-        return fgcodeRepositoiry.save(fgcode);
+        return fgcodeRepository.save(fgcode);
     }
 
     @DeleteMapping("/{id}")
     public void dropFgcode (@PathVariable String id){
         
-        fgcodeRepositoiry.deleteById(id);
+        fgcodeRepository.deleteById(id);
     }
+
+    
     
     
 }
