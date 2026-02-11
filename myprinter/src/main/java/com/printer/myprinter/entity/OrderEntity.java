@@ -35,13 +35,16 @@ public class OrderEntity {
     private Integer quantity;
 
     @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;    
-    // Constructor
+    private String notes;  
+    
+    @Column(name = "created_by")
+    private String created_By;
+    
     public OrderEntity() {}
     
     public OrderEntity(LocalDate orderDate, String lotNumber, String productId, 
                       String productName, String productExp, LocalDate productionDate, 
-                      LocalDate expiryDate, Integer quantity, String notes) {
+                      LocalDate expiryDate, Integer quantity, String notes, String created_By) {
         this.orderDate = orderDate;
         this.lotNumber = lotNumber;
         this.productId = productId;
@@ -51,6 +54,7 @@ public class OrderEntity {
         this.expiryDate = expiryDate;
         this.quantity = quantity;
         this.notes = notes;
+        this.created_By = created_By;
     }
     
     // Getters and Setters
@@ -132,5 +136,13 @@ public class OrderEntity {
 
     public void setNotes(String notes){
         this.notes = notes;
+    }
+
+    public String getCreated_By(){
+        return created_By;
+    }
+
+    public void setCreated_By(String created_By){
+        this.created_By = created_By;
     }
 }
