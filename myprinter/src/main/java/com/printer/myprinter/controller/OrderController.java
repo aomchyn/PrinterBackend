@@ -106,7 +106,7 @@ public class OrderController {
             orderToUpdate.setProductionDate(order.getProductionDate());
             orderToUpdate.setExpiryDate(order.getExpiryDate());
             orderToUpdate.setQuantity(order.getQuantity());
-            
+            orderToUpdate.setNotes(order.getNotes());
             OrderEntity updated = orderRepository.save(orderToUpdate);
             return ResponseEntity.ok(updated);
             
