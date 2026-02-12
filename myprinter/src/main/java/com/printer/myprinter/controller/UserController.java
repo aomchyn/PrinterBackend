@@ -8,8 +8,12 @@ import com.printer.myprinter.repository.UserRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,6 +104,13 @@ public class UserController {
 
             UserEntity userForCreateToken = userRepository.findByNameAndPassword(u, p);
 
+            // ✅ ตรวจสอบ null ถ้าไม่พบผู้ใช้
+        if (userForCreateToken == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+        
             String token = JWT.create()
                            .withSubject(String.valueOf(userForCreateToken.getId()))
                            .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
@@ -143,11 +154,11 @@ public class UserController {
 
                String role = user.getRole();
 
-               record UserResponse(Long id, String name, String email, String role){
+               record UserResponse(Long id, String name, String email, String role/* , String userId, String userName, String position, String department*/){
 
                }
 
-               return new UserResponse(user.getId(),user.getName(),user.getEmail(),role);
+               return new UserResponse(user.getId(),user.getName(),user.getEmail()/* ,user.getUserId(),user.getUserName(),user.getPosition(),user.getDepartment()*/,role);
 
 
         }catch (IllegalArgumentException e){
@@ -223,7 +234,11 @@ public class UserController {
 
                usertoupdate.setName(user.getName());
                usertoupdate.setEmail(user.getEmail());
-
+              /*  usertoupdate.setUserId(user.getUserId());
+               usertoupdate.setUserName(user.getUserName());
+               usertoupdate.setPosition(user.getPosition());
+               usertoupdate.setDepartment(user.getDepartment());
+*/
                if (user.getPassword() != null && !user.getPassword().isEmpty()){
                 usertoupdate.setPassword(user.getPassword());
                }

@@ -2,6 +2,7 @@ package com.printer.myprinter.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
@@ -32,17 +33,32 @@ public class OrderEntity {
     @Column(name = "expiry_date")
     private LocalDate expiryDate;
     
-    private Integer quantity;
+    private Long quantity;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;  
+
+    @Column (name = "created_By")
+    private String createdBy;
+
+    @Column(name="is_verified")
+    private Boolean isVerified;
+
+    @Column(name="verified_by")
+    private String verifiedBy;
+
+    @Column(name="verified_at")
+    private LocalDateTime verifiedAt;
     
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
     
     public OrderEntity() {}
     
     public OrderEntity(LocalDate orderDate, String lotNumber, String productId, 
                       String productName, String productExp, LocalDate productionDate, 
-                      LocalDate expiryDate, Integer quantity, String notes) {
+                      LocalDate expiryDate, Long quantity, String notes, String createdBy,
+                      Boolean isVerified, String verifiedBy, LocalDateTime verifiedAt,LocalDateTime createdAt) {
         this.orderDate = orderDate;
         this.lotNumber = lotNumber;
         this.productId = productId;
@@ -52,7 +68,12 @@ public class OrderEntity {
         this.expiryDate = expiryDate;
         this.quantity = quantity;
         this.notes = notes;
-    }
+        this.createdBy = createdBy;
+        this.isVerified = isVerified;
+        this.verifiedBy  = verifiedBy;
+        this.verifiedAt = verifiedAt;
+        this.createdAt = createdAt;
+        }   
     
     // Getters and Setters
     public Long getId() {
@@ -119,11 +140,11 @@ public class OrderEntity {
         this.expiryDate = expiryDate;
     }
     
-    public Integer getQuantity() {
+    public Long getQuantity() {
         return quantity;
     }
     
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(Long quantity) {
         this.quantity = quantity;
     }
 
@@ -133,6 +154,46 @@ public class OrderEntity {
 
     public void setNotes(String notes){
         this.notes = notes;
+    }
+
+    public String getCreatedBy(){
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy){
+        this.createdBy = createdBy;
+    }
+
+    public Boolean getIsVerified() {
+        return isVerified;
+    }
+    
+    public void setIsVerified(Boolean isVerified) {
+        this.isVerified = isVerified;
+    }
+    
+    public String getVerifiedBy() {
+        return verifiedBy;
+    }
+    
+    public void setVerifiedBy(String verifiedBy) {
+        this.verifiedBy = verifiedBy;
+    }
+    
+    public LocalDateTime getVerifiedAt() {
+        return verifiedAt;
+    }
+    
+    public void setVerifiedAt(LocalDateTime verifiedAt) {
+        this.verifiedAt = verifiedAt;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt = createdAt;
     }
 
     

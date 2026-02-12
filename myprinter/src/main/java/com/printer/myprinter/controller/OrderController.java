@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/printer/order")
 @CrossOrigin(origins = "*")
 public class OrderController {
     
@@ -70,7 +71,7 @@ public class OrderController {
     @PostMapping("/create")
     public ResponseEntity<?> createOrder(@RequestBody OrderEntity order) {
         try {
-            System.out.println("Creating order for product: " + order.getProductId());
+            order.setCreatedAt(LocalDateTime.now());
             
             OrderEntity saved = orderRepository.save(order);
             System.out.println("Created successfully with ID: " + saved.getId());
@@ -107,7 +108,23 @@ public class OrderController {
             orderToUpdate.setExpiryDate(order.getExpiryDate());
             orderToUpdate.setQuantity(order.getQuantity());
             orderToUpdate.setNotes(order.getNotes());
+            orderToUpdate.setCreatedBy(order.getCreatedBy());
+            orderToUpdate.setIsVerified(order.getIsVerified());
+            orderToUpdate.setVerifiedBy(order.getVerifiedBy());
+            orderToUpdate.setVerifiedAt(order.getVerifiedAt());
 
+            if (Boolean.TRUE.equals(order.getIsVerified())) {
+                // ตรวจสอบว่าเพิ่ง verify (ยังไม่เคย verify มาก่อน)
+                if (orderToUpdate.getVerifiedAt() == null || 
+                    !Boolean.TRUE.equals(existingOrder.get().getIsVerified())) {
+                    orderToUpdate.setVerifiedAt(LocalDateTime.now()); // ← เวลาเซิร์ฟเวอร์ไทย
+                } else {
+                    orderToUpdate.setVerifiedAt(orderToUpdate.getVerifiedAt()); // ← คงเวลาเดิม
+                }
+            } else {
+                orderToUpdate.setVerifiedAt(null); // ← ยกเลิก verify → ล้างเวลา
+            }
+            
             OrderEntity updated = orderRepository.save(orderToUpdate);
             return ResponseEntity.ok(updated);
             
@@ -143,29 +160,7 @@ public class OrderController {
         }
     }
     
-    // ✅ หา order ที่หมดอายุแล้ว
-    @GetMapping("/expired")
-    public ResponseEntity<List<OrderEntity>> getExpiredOrders() {
-        try {
-            LocalDate today = LocalDate.now();
-            List<OrderEntity> orders = orderRepository.findByExpiryDateBefore(today);
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
     
-    // ✅ หา order ที่ยังไม่หมดอายุ
-    @GetMapping("/active")
-    public ResponseEntity<List<OrderEntity>> getActiveOrders() {
-        try {
-            LocalDate today = LocalDate.now();
-            List<OrderEntity> orders = orderRepository.findByExpiryDateAfter(today);
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    
+ 
 }
