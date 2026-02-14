@@ -74,7 +74,6 @@ public class OrderController {
             order.setCreatedAt(LocalDateTime.now());
             
             OrderEntity saved = orderRepository.save(order);
-            System.out.println("Created successfully with ID: " + saved.getId());
             
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
             

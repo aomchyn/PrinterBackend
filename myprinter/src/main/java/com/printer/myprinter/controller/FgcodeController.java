@@ -56,7 +56,7 @@ public class FgcodeController {
     @PostMapping("/create")
     public ResponseEntity<?> fgcodeCreate(@RequestBody FgcodeEntity fgcode){
         try {
-            System.out.println("Creating fgcode: " + fgcode.getId()); // Debug
+            
             
             // ตรวจสอบว่ามี ID ซ้ำหรือไม่
             if (fgcodeRepository.existsById(fgcode.getId())) {
@@ -66,7 +66,6 @@ public class FgcodeController {
             }
             
             FgcodeEntity saved = fgcodeRepository.save(fgcode);
-            System.out.println("Created successfully: " + saved.getId()); // Debug
             
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
             
