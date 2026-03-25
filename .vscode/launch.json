@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MyprinterApplication<myprinter>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.printer.myprinter.MyprinterApplication",
+            "projectName": "myprinter",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
