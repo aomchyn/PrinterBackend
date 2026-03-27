@@ -6,5 +6,5 @@ import com.printer.myprinter.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
  
     UserEntity findByNameAndEmail (String name, String email);
-    UserEntity findByNameAndPassword (String name, String password);
+    UserEntity findByName(String name);
 }

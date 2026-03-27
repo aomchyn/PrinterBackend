@@ -60,6 +60,7 @@ public class FgcodeController {
 
     // ✅ สร้างใหม่
     @PostMapping("/create")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> fgcodeCreate(@Valid @RequestBody FgcodeEntity fgcode) {
         try {
             // ตรวจสอบว่ามี ID ซ้ำหรือไม่
@@ -83,6 +84,7 @@ public class FgcodeController {
 
     // ✅ แก้ไข
     @PostMapping("/update-profile")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> fgcodeUpdate(@Valid @RequestBody FgcodeEntity fgcode) {
         try {
             Optional<FgcodeEntity> existingFgcode = fgcodeRepository.findById(fgcode.getId());
@@ -113,6 +115,7 @@ public class FgcodeController {
 
     // ✅ แก้ไขแบบ PUT method
     @PutMapping("/{id}")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> updateFgcode(@PathVariable String id, @Valid @RequestBody FgcodeEntity fgcode) {
         try {
             Optional<FgcodeEntity> existingFgcode = fgcodeRepository.findById(id);
@@ -140,6 +143,7 @@ public class FgcodeController {
 
     // ✅ ลบ
     @DeleteMapping("/{id}")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> dropFgcode(@PathVariable String id) {
         try {
             if (!fgcodeRepository.existsById(id)) {

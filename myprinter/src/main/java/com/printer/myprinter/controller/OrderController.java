@@ -75,6 +75,7 @@ public class OrderController {
 
     // ✅ สร้างใหม่
     @PostMapping("/create")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> createOrder(@Valid @RequestBody OrderEntity order) {
         try {
             order.setCreatedAt(LocalDateTime.now());
@@ -93,6 +94,7 @@ public class OrderController {
 
     // ✅ แก้ไข
     @PutMapping("/{id}")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderEntity order) {
         try {
             Optional<OrderEntity> existingOrder = orderRepository.findById(id);
@@ -142,6 +144,7 @@ public class OrderController {
 
     // ✅ ลบ
     @DeleteMapping("/{id}")
+    @RequireAuth(roles = { "admin" })
     public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
         try {
             if (!orderRepository.existsById(id)) {
