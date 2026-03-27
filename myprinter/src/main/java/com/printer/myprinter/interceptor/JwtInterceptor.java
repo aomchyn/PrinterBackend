@@ -2,11 +2,11 @@ package com.printer.myprinter.interceptor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.printer.myprinter.WebConfig;
 import com.printer.myprinter.annotation.RequireAuth;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -21,12 +21,17 @@ import java.util.Arrays;
 public class JwtInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(JwtInterceptor.class);
+    private final String jwtSecret;
+
+    public JwtInterceptor(@Value("${JWT_SECRET}") String jwtSecret) {
+        this.jwtSecret = jwtSecret;
+    }
 
     @Override
     public boolean preHandle(
             HttpServletRequest request,
-            HttpServletResponse response, Object handler)
-            throws Exception {
+            HttpServletResponse response,
+            Object handler) throws Exception {
 
         // ข้าม OPTIONS request (preflight CORS)
         if (request.getMethod().equals("OPTIONS")) {
@@ -58,12 +63,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         try {
-            String tokenWithOutBearer = token.replace("Bearer ", "").trim();
-            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(WebConfig.getSecret()))
+            String tokenWithoutBearer = token.replace("Bearer ", "").trim();
+            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(jwtSecret))
                     .build()
-                    .verify(tokenWithOutBearer);
+                    .verify(tokenWithoutBearer);
 
-            // ดึง user id และ role จาก JWT
             String userId = decodedJWT.getSubject();
             String role = decodedJWT.getClaim("role").asString();
 
@@ -86,6 +90,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             request.setAttribute("userRole", role);
 
             return true;
+
         } catch (Exception e) {
             log.warn("JWT verification failed: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

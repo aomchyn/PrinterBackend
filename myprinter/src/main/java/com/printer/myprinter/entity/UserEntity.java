@@ -3,13 +3,15 @@ package com.printer.myprinter.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import com.printer.myprinter.enums.Role;
 
 @Entity
 public class UserEntity {
@@ -28,8 +30,8 @@ public class UserEntity {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    @Pattern(regexp = "^(admin|user|viewer)$", message = "Role must be 'admin', 'user', or 'viewer'")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     // getter | setter
     public Long getId() {
@@ -50,7 +52,7 @@ public class UserEntity {
         return password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -72,7 +74,7 @@ public class UserEntity {
         this.password = password;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

@@ -6,12 +6,16 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.printer.myprinter.interceptor.JwtInterceptor;
 import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
-    private static String secret;
+   
+    @Value("${JWT_SECRET}")
+    private String jwtSecret; // ✅ ให้ Spring inject แทน static
 
     public WebConfig(JwtInterceptor jwtInterceptor) {
         this.jwtInterceptor = jwtInterceptor;
@@ -43,35 +47,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("Authorization", "Content-Type", "Accept");
     }
 
-    public static String getSecret() {
-        if (secret == null) {
-            // ลอง system property ก่อน (จะถูก set โดย MyprinterApplication จาก .env)
-            secret = System.getProperty("JWT_SECRET");
-
-            // ถ้าไม่มี ลองโหลดจาก .env โดยตรง
-            if (secret == null) {
-                try {
-                    Dotenv dotenv = Dotenv.configure()
-                            .directory(System.getProperty("user.dir"))
-                            .ignoreIfMissing()
-                            .load();
-                    secret = dotenv.get("JWT_SECRET");
-                } catch (Exception e) {
-                    // fallback: ลอง sub-directory
-                    Dotenv dotenv = Dotenv.configure()
-                            .directory(System.getProperty("user.dir") + "/myprinter")
-                            .ignoreIfMissing()
-                            .load();
-                    secret = dotenv.get("JWT_SECRET");
-                }
-            }
-
-            if (secret == null || secret.length() < 32) {
-                throw new IllegalStateException(
-                        "JWT_SECRET must be set and at least 32 characters long. " +
-                                "Set it in .env file or as an environment variable.");
-            }
+  @PostConstruct
+    public void validateSecret() {
+        if (jwtSecret == null || jwtSecret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT_SECRET must be set and at least 32 characters long.");
         }
-        return secret;
     }
+   
+ public String getJwtSecret() {
+        return jwtSecret;
+    }
+
+
 }

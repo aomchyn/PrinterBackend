@@ -1,8 +1,9 @@
 package com.printer.myprinter.dto;
 
+import com.printer.myprinter.enums.Role;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UserRequestDTO {
@@ -17,8 +18,8 @@ public class UserRequestDTO {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    @Pattern(regexp = "^(admin|user|viewer)$", message = "Role must be 'admin', 'user', or 'viewer'")
-    private String role;
+    
+    private Role role;
 
     public String getName() {
         return name;
@@ -44,11 +45,11 @@ public class UserRequestDTO {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

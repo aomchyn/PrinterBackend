@@ -1,10 +1,12 @@
 package com.printer.myprinter.dto;
 
+import com.printer.myprinter.enums.Role;
+
 public class LoginResponseDTO {
     private String token;
-    private String role;
+    private  Role role;
 
-    public LoginResponseDTO(String token, String role) {
+    public LoginResponseDTO(String token, Role role) {
         this.token = token;
         this.role = role;
     }
@@ -17,11 +19,11 @@ public class LoginResponseDTO {
         this.token = token;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

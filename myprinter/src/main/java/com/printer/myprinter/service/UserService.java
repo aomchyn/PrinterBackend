@@ -10,6 +10,11 @@ import com.printer.myprinter.dto.UserResponseDTO;
 import com.printer.myprinter.entity.UserEntity;
 import com.printer.myprinter.exception.UserNotFoundException;
 import com.printer.myprinter.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+
+import io.lettuce.core.dynamic.annotation.Value;
+import jakarta.transaction.Transactional;
+
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +27,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RateLimitService rateLimitService;
+    private final String jwtSecret;
 
     private static final long EXPIRATION_TIME = 60 * 60 * 1000 * 2; // 2 hours
 
-    public UserService(UserRepository userRepository, RateLimitService rateLimitService) {
+    public UserService(UserRepository userRepository, RateLimitService rateLimitService, @Value("${JWT_SECRET}") String jwtSecret) {
         this.userRepository = userRepository;
         this.rateLimitService = rateLimitService;
+        this.jwtSecret = jwtSecret;
     }
 
     public List<UserResponseDTO> getAllUsers() {
@@ -56,6 +63,7 @@ public class UserService {
         return mapToDTO(savedUser);
     }
 
+     @Transactional
     public UserResponseDTO updateUser(Long id, UserRequestDTO request) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -64,7 +72,7 @@ public class UserService {
         user.setEmail(request.getEmail());
         
         // Ensure role updates are handled if provided
-        if (request.getRole() != null && !request.getRole().isEmpty()) {
+        if (request.getRole() != null ) {
             user.setRole(request.getRole());
         }
 
@@ -76,6 +84,7 @@ public class UserService {
         return mapToDTO(updatedUser);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException("User not found");
@@ -83,6 +92,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    @Transactional
     public LoginResponseDTO authenticate(LoginRequestDTO request, String ipKeyPrefix) {
         String username = request.getName();
         String rateLimitKey = ipKeyPrefix + ":" + username;
@@ -98,28 +108,30 @@ public class UserService {
         }
 
         try {
-            if (!BCrypt.checkpw(request.getPassword(), dbUser.getPassword())) {
-                throw new IllegalArgumentException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-            }
-        } catch (IllegalArgumentException e) {
-             // ✅ เพิ่ม plaintext fallback + migrate
-    if (dbUser.getPassword().equals(request.getPassword())) {
+    if (!BCrypt.checkpw(request.getPassword(), dbUser.getPassword())) {
+        throw new IllegalArgumentException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+    }
+} catch (IllegalArgumentException e) {
+    // BCrypt โยน exception = password ที่เก็บไว้ไม่ใช่ bcrypt hash (plaintext เก่า)
+    if (dbUser.getPassword() != null && 
+        dbUser.getPassword().equals(request.getPassword())) {
+        // Migrate plaintext → bcrypt
         dbUser.setPassword(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()));
         userRepository.save(dbUser);
+        // ✅ ไม่ throw — login สำเร็จ ดำเนินต่อได้เลย
     } else {
         throw new IllegalArgumentException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
     }
-            throw new IllegalArgumentException("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-        }
+}
 
         rateLimitService.resetKey(rateLimitKey);
 
         String token = JWT.create()
-                .withSubject(String.valueOf(dbUser.getId()))
-                .withClaim("role", dbUser.getRole())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .withIssuedAt(new Date())
-                .sign(Algorithm.HMAC256(WebConfig.getSecret()));
+        .withSubject(String.valueOf(dbUser.getId()))
+        .withClaim("role", dbUser.getRole().name()) // ✅ .name() คืนค่า "ADMIN", "USER", "VIEWER"
+        .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+        .withIssuedAt(new Date())
+        .sign(Algorithm.HMAC256(jwtSecret));
 
         return new LoginResponseDTO(token, dbUser.getRole());
     }
